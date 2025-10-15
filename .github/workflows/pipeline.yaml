@@ -43,11 +43,11 @@ jobs:
       - name: Install Trivy
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y wget
-          wget -qO- https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo deb https://aquasecurity.github.io/trivy-repo/deb stable main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update -y
-          sudo apt-get install -y trivy
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+           echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+           sudo apt-get update -y
+            sudo apt-get install -y trivy
 
       - name: Trivy FS Scan
         run: |
@@ -76,3 +76,4 @@ jobs:
           echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
           docker tag app:latest myrepo/app:latest
           docker push myrepo/app:latest
+
