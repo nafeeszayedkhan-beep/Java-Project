@@ -7,30 +7,72 @@ on:
     branches: [ main ]
 
 jobs:
-  build-test-scan:
+  build-and-test:
     runs-on: ubuntu-latest
+
     steps:
+      # 1. Checkout Code and Setup
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Set Up Python Environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.12"
 
-      - name: List files
-        run: ls -R
-
+      # 3. Install Project Dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r Java-Project/requirements.txt   # 👈 Change path if needed
+          pip install -r requirements.txt
 
+      # 4. Static Code Analysis (Linting & Formatting)
       - name: Lint code with flake8
-        run: flake8 .
+        run: |
+          pip install flake8
+          flake8 .
 
+      # 5. Security Scanning (Bandit)
       - name: Bandit Security Scan
-        run: bandit -r .
+        run: |
+          pip install bandit
+          bandit -r .
 
+      # 6. Security Scanning (Trivy File System)
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y wget
+          wget -qO- https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb stable main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
+
+      - name: Trivy FS Scan
+        run: |
+          trivy fs --exit-code 1 --severity CRITICAL,HIGH .
+
+      # 7. Unit Tests & Coverage
       - name: Unit testing and coverage
-        run: pytest --maxfail=1 --disable-warnings -q
+        run: |
+          pip install pytest pytest-cov
+          pytest --cov=my_app --cov-fail-under=80
+
+      # 8. Build Docker Image
+      - name: Build Docker image
+        run: |
+          docker build -t app:latest .
+
+      # 9. Scan Docker Image
+      - name: Scan Docker Image with Trivy
+        run: |
+          trivy image --exit-code 1 --severity CRITICAL,HIGH app:latest
+
+      # 10. Push Docker Image to Docker Hub
+      - name: Push Docker image to Docker Hub
+        if: success()  # Push only if all previous steps pass
+        run: |
+          echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+          docker tag app:latest myrepo/app:latest
+          docker push myrepo/app:latest
