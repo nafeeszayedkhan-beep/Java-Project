@@ -1,0 +1,29 @@
+name: Java Linting
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  lint:
+    name: Run Checkstyle Linter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install Checkstyle
+        run: |
+          wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.18.1/checkstyle-10.18.1-all.jar -O checkstyle.jar
+
+      - name: Run Checkstyle on Java files
+        run: |
+          java -jar checkstyle.jar -c /google_checks.xml App.java || true
