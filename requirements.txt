@@ -1,0 +1,20 @@
+# Core dependencies (example for a Python app)
+# Add your project’s actual dependencies below
+# e.g. flask, fastapi, django, requests, etc.
+
+# --- Project dependencies ---
+flask
+
+# --- Testing & Coverage ---
+pytest
+pytest-cov
+
+# --- Linting & Code Style ---
+flake8
+
+# --- Security Scanning ---
+bandit
+
+# --- (Optional) Type Checking / Formatting ---
+black
+mypy
