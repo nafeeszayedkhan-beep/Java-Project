@@ -58,8 +58,9 @@ jobs:
       # 7. Unit Tests & Coverage
       - name: Unit testing and coverage
         run: |
+         
           pip install pytest pytest-cov
-          pytest --cov=. --cov-fail-under=80
+          pytest --cov=my_app --cov-fail-under=80
 
       # 8. Build Docker Image
       - name: Build Docker image
@@ -78,6 +79,7 @@ jobs:
           echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
           docker tag app:latest myrepo/app:latest
           docker push myrepo/app:latest
+
 
 
 
