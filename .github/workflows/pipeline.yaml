@@ -42,10 +42,10 @@ jobs:
       # 6. Security Scanning (Trivy File System)
       - name: Install Trivy
         run: |
-          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb jammy
-          main" | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update -y
-           sudo apt-get install -y trivy
+             echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb jammy main" | sudo tee /etc/apt/sources.list.d/trivy.list
+
+               sudo apt-get update -y
+               sudo apt-get install -y trivy
 
 
 
@@ -76,6 +76,7 @@ jobs:
           echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
           docker tag app:latest myrepo/app:latest
           docker push myrepo/app:latest
+
 
 
 
